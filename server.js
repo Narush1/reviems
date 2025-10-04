@@ -1,6 +1,6 @@
 const express = require('express');
-const path = require('path');
 const http = require('http');
+const path = require('path');
 const WebSocket = require('ws');
 
 const app = express();
@@ -14,30 +14,33 @@ const wss = new WebSocket.Server({ server });
 let reviews = [];
 
 function broadcast(data) {
-  const json = JSON.stringify(data);
+  const message = JSON.stringify(data);
   wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) client.send(json);
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
   });
 }
 
 function calculateStats() {
-  const count = reviews.length;
-  if (count === 0) return { count: 0, average: "0.00" };
+  if (reviews.length === 0) return { count: 0, average: "0.00" };
   const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-  return { count, average: (sum / count).toFixed(2) };
+  return { count: reviews.length, average: (sum / reviews.length).toFixed(2) };
 }
 
 wss.on('connection', ws => {
+  // Отправляем текущие отзывы и статистику сразу после подключения
   ws.send(JSON.stringify({ type: 'reviews_update', reviews, stats: calculateStats() }));
 
-  ws.on('message', msg => {
+  ws.on('message', message => {
     try {
-      const data = JSON.parse(msg);
+      const data = JSON.parse(message);
       if (data.type === 'new_review') {
         const { name, rating, comment } = data;
+
         if (
-          typeof name === 'string' && name.trim() &&
-          typeof comment === 'string' && comment.trim() &&
+          typeof name === 'string' && name.trim() !== '' &&
+          typeof comment === 'string' && comment.trim() !== '' &&
           typeof rating === 'number' && rating >= 0 && rating <= 5
         ) {
           const review = {
@@ -50,12 +53,17 @@ wss.on('connection', ws => {
           broadcast({ type: 'reviews_update', reviews, stats: calculateStats() });
         }
       }
-    } catch {
-      // ignore parse errors
+    } catch (e) {
+      // Ошибка в JSON или что-то ещё — игнорируем
+      console.error('Ошибка при обработке сообщения от клиента:', e);
     }
+  });
+
+  ws.on('close', () => {
+    // Можно добавить логику при отключении, если нужно
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server started at http://localhost:${PORT}`);
 });
