@@ -1,24 +1,15 @@
 (() => {
   const ws = new WebSocket(`ws://${window.location.host}`);
 
-  const starContainer = document.getElementById('starRating');
-  const stars = Array.from(starContainer.children);
+  const stars = Array.from(document.querySelectorAll('#starRating .star'));
   let selectedRating = 0;
 
   const reviewsContainer = document.getElementById('reviewsContainer');
+  const statsContainer = document.getElementById('statsContainer');
 
-  // Создаем контейнер для статистики
-  let statsContainer = document.getElementById('statsContainer');
-  if (!statsContainer) {
-    statsContainer = document.createElement('div');
-    statsContainer.id = 'statsContainer';
-    reviewsContainer.parentNode.insertBefore(statsContainer, reviewsContainer);
-  }
-
-  // Обновление отображения звёздочек
   function updateStars(rating) {
-    stars.forEach((star, index) => {
-      if (index < rating) {
+    stars.forEach((star, i) => {
+      if (i < rating) {
         star.textContent = '★';
         star.classList.add('selected');
       } else {
@@ -28,33 +19,18 @@
     });
   }
 
-  // Навешиваем события на звёздочки
-  stars.forEach((star, index) => {
-    star.style.cursor = 'pointer';
-
+  stars.forEach((star, i) => {
+    star.addEventListener('mouseenter', () => updateStars(i + 1));
+    star.addEventListener('mouseleave', () => updateStars(selectedRating));
     star.addEventListener('click', () => {
-      selectedRating = index + 1;
-      updateStars(selectedRating);
-    });
-
-    star.addEventListener('mouseenter', () => {
-      updateStars(index + 1);
-    });
-
-    star.addEventListener('mouseleave', () => {
+      selectedRating = i + 1;
       updateStars(selectedRating);
     });
   });
 
-  // Обновление статистики
-  function updateStats(stats) {
-    statsContainer.textContent = `Всего отзывов: ${stats.count} | Средняя оценка: ${stats.average}`;
-  }
-
-  // Отрисовка отзывов
   function renderReviews(reviews) {
     reviewsContainer.innerHTML = '';
-    reviews.slice().reverse().forEach(({ name, rating, comment, id }) => {
+    reviews.slice().reverse().forEach(({ name, rating, comment }) => {
       const review = document.createElement('div');
       review.classList.add('review');
 
@@ -80,6 +56,10 @@
 
       reviewsContainer.appendChild(review);
     });
+  }
+
+  function updateStats(stats) {
+    statsContainer.textContent = `Всего отзывов: ${stats.count} | Средняя оценка: ${stats.average}`;
   }
 
   const form = document.getElementById('reviewForm');
@@ -116,7 +96,7 @@
   });
 
   ws.addEventListener('open', () => {
-    console.log('WebSocket подключен');
+    console.log('WebSocket подключён');
   });
 
   ws.addEventListener('message', event => {
