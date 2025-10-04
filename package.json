@@ -1,0 +1,15 @@
+{
+  "name": "nikita-reviews",
+  "version": "1.0.0",
+  "description": "Отзывы к программисту Никите Нарушавичусу",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Nikita Narushavichus",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  }
+}
