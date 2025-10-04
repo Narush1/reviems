@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname)));
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const reviews = [];
+let reviews = [];
 
 function broadcast(data) {
   const json = JSON.stringify(data);
@@ -30,19 +30,18 @@ function calculateStats() {
 }
 
 wss.on('connection', ws => {
+  // При подключении отправляем текущие отзывы и статистику
   ws.send(JSON.stringify({ type: 'reviews_update', reviews, stats: calculateStats() }));
 
-  ws.on('message', message => {
+  ws.on('message', msg => {
     try {
-      const data = JSON.parse(message);
-
+      const data = JSON.parse(msg);
       if (data.type === 'new_review') {
         const { name, rating, comment } = data;
-
         if (
           typeof name === 'string' && name.trim() &&
           typeof comment === 'string' && comment.trim() &&
-          typeof rating === 'number' && rating >= 1 && rating <= 5
+          typeof rating === 'number' && rating >=1 && rating <=5
         ) {
           const review = {
             id: Date.now(),
@@ -63,5 +62,5 @@ wss.on('connection', ws => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
