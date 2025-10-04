@@ -1,6 +1,7 @@
 {
-  "name": "nikita-reviews",
+  "name": "reviews-websocket-app",
   "version": "1.0.0",
+  "description": "Отзывчивый сайт отзывов с WebSocket на Node.js",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -8,5 +9,11 @@
   "dependencies": {
     "express": "^4.18.2",
     "ws": "^8.13.0"
-  }
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "keywords": ["reviews", "websocket", "nodejs", "express"],
+  "author": "Никита Нарушавичус",
+  "license": "MIT"
 }
