@@ -16,9 +16,7 @@ let reviews = [];
 function broadcast(data) {
   const json = JSON.stringify(data);
   wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(json);
-    }
+    if (client.readyState === WebSocket.OPEN) client.send(json);
   });
 }
 
@@ -30,19 +28,13 @@ function calculateStats() {
 }
 
 wss.on('connection', ws => {
-  console.log('New client connected');
-
-  // Отправляем сразу отзывы и статистику
   ws.send(JSON.stringify({ type: 'reviews_update', reviews, stats: calculateStats() }));
 
   ws.on('message', msg => {
-    console.log('Received message:', msg);
-
     try {
       const data = JSON.parse(msg);
       if (data.type === 'new_review') {
         const { name, rating, comment } = data;
-
         if (
           typeof name === 'string' && name.trim() &&
           typeof comment === 'string' && comment.trim() &&
@@ -56,20 +48,11 @@ wss.on('connection', ws => {
           };
           reviews.push(review);
           broadcast({ type: 'reviews_update', reviews, stats: calculateStats() });
-          console.log('Review added and broadcasted');
-        } else {
-          ws.send(JSON.stringify({ type: 'error', message: 'Invalid review data' }));
-          console.log('Invalid data received');
         }
       }
-    } catch (err) {
-      ws.send(JSON.stringify({ type: 'error', message: 'Error parsing JSON' }));
-      console.log('Error parsing JSON:', err);
+    } catch {
+      // ignore parse errors
     }
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
   });
 });
 
