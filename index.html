@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Отзывы к программисту Никите Нарушавичусу</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Отзывы Никите Нарушавичусу</title>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <h1>Пиши отзывы к программисту Никите Нарушавичусу</h1>
-
     <form id="reviewForm">
       <label for="name">Имя</label>
-      <input type="text" id="name" required placeholder="Ваше имя" />
-
-      <label for="rating">Оценка</label>
-      <div class="stars" id="starRating">
+      <input id="name" type="text" placeholder="Ваше имя" required />
+      
+      <label>Оценка</label>
+      <div id="starRating" class="stars">
         <span data-value="1" class="star">&#9734;</span>
         <span data-value="2" class="star">&#9734;</span>
         <span data-value="3" class="star">&#9734;</span>
@@ -24,7 +23,7 @@
       </div>
 
       <label for="comment">Отзыв</label>
-      <textarea id="comment" rows="4" required placeholder="Напишите ваш отзыв"></textarea>
+      <textarea id="comment" placeholder="Напишите отзыв" rows="4" required></textarea>
 
       <button type="submit">Отправить отзыв</button>
     </form>
@@ -32,9 +31,9 @@
     <hr />
 
     <h2>Отзывы</h2>
+    <div id="statsContainer"></div>
     <div id="reviewsContainer"></div>
   </div>
-
   <script src="client.js"></script>
 </body>
 </html>
