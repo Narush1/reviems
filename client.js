@@ -5,6 +5,16 @@
   const statsEl = document.getElementById('stats');
   const form = document.getElementById('reviewForm');
 
+  function escapeHTML(text) {
+    return text.replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c]);
+  }
+
   function renderReviews(reviews) {
     reviewsEl.innerHTML = '';
     if (reviews.length === 0) {
@@ -32,12 +42,13 @@
 
   form.addEventListener('submit', e => {
     e.preventDefault();
+
     const name = form.name.value.trim();
     const comment = form.comment.value.trim();
     let rating = parseFloat(form.rating.value);
 
     if (!name || !comment) {
-      alert('Пожалуйста, заполните все поля');
+      alert('Пожалуйста, заполните все поля.');
       return;
     }
     if (isNaN(rating) || rating < 0 || rating > 5) {
@@ -57,8 +68,8 @@
     console.log('WebSocket подключён');
   });
 
-  ws.addEventListener('message', event => {
-    const data = JSON.parse(event.data);
+  ws.addEventListener('message', e => {
+    const data = JSON.parse(e.data);
     if (data.type === 'reviews_update') {
       updateStats(data.stats);
       renderReviews(data.reviews);
@@ -72,15 +83,4 @@
   ws.addEventListener('error', () => {
     console.error('Ошибка WebSocket');
   });
-
-  // Безопасный вывод текста (просто чтобы не было XSS)
-  function escapeHTML(text) {
-    return text.replace(/[&<>"']/g, c => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    })[c]);
-  }
 })();
