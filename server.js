@@ -1,69 +1,92 @@
+// Импортируем необходимые модули
 const express = require('express');
 const http = require('http');
-const path = require('path');
 const WebSocket = require('ws');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static(path.join(__dirname)));
-
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+// Отзывы храним в памяти
 let reviews = [];
 
-function broadcast(data) {
-  const message = JSON.stringify(data);
+// Функция для подсчета статистики
+function getStats() {
+  const count = reviews.length;
+  const avg = count === 0 ? 0 : reviews.reduce((sum, r) => sum + r.rating, 0) / count;
+  return { count, average: avg };
+}
+
+// Отправляем всем клиентам обновления
+function broadcastReviews() {
+  const data = JSON.stringify({
+    type: 'update',
+    reviews,
+    stats: getStats()
+  });
+
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
+      client.send(data);
     }
   });
 }
 
-function calculateStats() {
-  if (reviews.length === 0) return { count: 0, average: "0.00" };
-  const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-  return { count: reviews.length, average: (sum / reviews.length).toFixed(2) };
-}
+// Middleware для отдачи статики
+app.use(express.static(path.join(__dirname)));
 
+// Парсинг JSON тела (если понадобится)
+app.use(express.json());
+
+// Обработка подключения WebSocket
 wss.on('connection', ws => {
-  // Отправляем текущие отзывы и статистику сразу после подключения
-  ws.send(JSON.stringify({ type: 'reviews_update', reviews, stats: calculateStats() }));
+  // При новом клиенте сразу отправляем текущие отзывы и статистику
+  ws.send(JSON.stringify({
+    type: 'update',
+    reviews,
+    stats: getStats()
+  }));
 
+  // Обработка входящих сообщений
   ws.on('message', message => {
     try {
       const data = JSON.parse(message);
-      if (data.type === 'new_review') {
-        const { name, rating, comment } = data;
 
+      // Проверяем, что это новый отзыв
+      if (data.type === 'new_review') {
+        const review = data.review;
+
+        // Валидация на сервере
         if (
-          typeof name === 'string' && name.trim() !== '' &&
-          typeof comment === 'string' && comment.trim() !== '' &&
-          typeof rating === 'number' && rating >= 0 && rating <= 5
+          typeof review.name !== 'string' || review.name.trim() === '' ||
+          typeof review.comment !== 'string' || review.comment.trim() === '' ||
+          typeof review.rating !== 'number' || isNaN(review.rating) ||
+          review.rating < 0 || review.rating > 5 ||
+          Math.round(review.rating * 10) !== review.rating * 10 // точность до 1 знака после запятой
         ) {
-          const review = {
-            id: Date.now(),
-            name: name.trim(),
-            rating: Math.round(rating * 10) / 10,
-            comment: comment.trim()
-          };
-          reviews.push(review);
-          broadcast({ type: 'reviews_update', reviews, stats: calculateStats() });
+          ws.send(JSON.stringify({ type: 'error', message: 'Неверные данные отзыва' }));
+          return;
         }
+
+        // Обрезаем поля и добавляем отзыв
+        reviews.push({
+          name: review.name.trim(),
+          rating: review.rating,
+          comment: review.comment.trim()
+        });
+
+        // Рассылаем обновления всем клиентам
+        broadcastReviews();
       }
     } catch (e) {
-      // Ошибка в JSON или что-то ещё — игнорируем
-      console.error('Ошибка при обработке сообщения от клиента:', e);
+      ws.send(JSON.stringify({ type: 'error', message: 'Некорректный формат данных' }));
     }
-  });
-
-  ws.on('close', () => {
-    // Можно добавить логику при отключении, если нужно
   });
 });
 
+// Запускаем сервер
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`);
+  console.log(`Сервер запущен на порту ${PORT}`);
 });
