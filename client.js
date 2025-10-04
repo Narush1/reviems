@@ -1,32 +1,8 @@
 (() => {
   const ws = new WebSocket(`ws://${window.location.host}`);
 
-  const stars = Array.from(document.querySelectorAll('#starRating .star'));
-  let selectedRating = 0;
-
   const reviewsContainer = document.getElementById('reviewsContainer');
   const statsContainer = document.getElementById('statsContainer');
-
-  function updateStars(rating) {
-    stars.forEach((star, i) => {
-      if (i < rating) {
-        star.textContent = '★';
-        star.classList.add('selected');
-      } else {
-        star.textContent = '☆';
-        star.classList.remove('selected');
-      }
-    });
-  }
-
-  stars.forEach((star, i) => {
-    star.addEventListener('mouseenter', () => updateStars(i + 1));
-    star.addEventListener('mouseleave', () => updateStars(selectedRating));
-    star.addEventListener('click', () => {
-      selectedRating = i + 1;
-      updateStars(selectedRating);
-    });
-  });
 
   function renderReviews(reviews) {
     reviewsContainer.innerHTML = '';
@@ -40,12 +16,12 @@
       const userName = document.createElement('div');
       userName.textContent = name;
 
-      const starsElem = document.createElement('div');
-      starsElem.classList.add('review-stars');
-      starsElem.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const ratingElem = document.createElement('div');
+      ratingElem.classList.add('review-rating');
+      ratingElem.textContent = rating.toFixed(1);
 
       header.appendChild(userName);
-      header.appendChild(starsElem);
+      header.appendChild(ratingElem);
 
       const commentElem = document.createElement('div');
       commentElem.classList.add('review-comment');
@@ -69,13 +45,15 @@
 
     const name = form.name.value.trim();
     const comment = form.comment.value.trim();
+    let rating = parseFloat(form.rating.value);
 
     if (!name || !comment) {
       alert('Пожалуйста, заполните все поля.');
       return;
     }
-    if (selectedRating === 0) {
-      alert('Пожалуйста, поставьте оценку.');
+
+    if (isNaN(rating) || rating < 0 || rating > 5) {
+      alert('Пожалуйста, введите оценку от 0.0 до 5.0');
       return;
     }
 
@@ -83,13 +61,11 @@
       ws.send(JSON.stringify({
         type: 'new_review',
         name,
-        rating: selectedRating,
+        rating,
         comment
       }));
 
       form.reset();
-      selectedRating = 0;
-      updateStars(0);
     } else {
       alert('Нет соединения с сервером');
     }
