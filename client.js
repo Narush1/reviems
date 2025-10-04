@@ -7,23 +7,18 @@
 
   const reviewsContainer = document.getElementById('reviewsContainer');
 
-  // Создаем и вставляем контейнер для статистики
-  const statsContainer = document.createElement('div');
-  statsContainer.id = 'statsContainer';
-  reviewsContainer.parentNode.insertBefore(statsContainer, reviewsContainer);
+  // Создаем контейнер для статистики
+  let statsContainer = document.getElementById('statsContainer');
+  if (!statsContainer) {
+    statsContainer = document.createElement('div');
+    statsContainer.id = 'statsContainer';
+    reviewsContainer.parentNode.insertBefore(statsContainer, reviewsContainer);
+  }
 
-  stars.forEach((star, i) => {
-    star.addEventListener('mouseenter', () => highlightStars(i + 1));
-    star.addEventListener('mouseleave', () => highlightStars(selectedRating));
-    star.addEventListener('click', () => {
-      selectedRating = i + 1;
-      highlightStars(selectedRating);
-    });
-  });
-
-  function highlightStars(count) {
-    stars.forEach((star, i) => {
-      if (i < count) {
+  // Обновление отображения звёздочек
+  function updateStars(rating) {
+    stars.forEach((star, index) => {
+      if (index < rating) {
         star.textContent = '★';
         star.classList.add('selected');
       } else {
@@ -33,13 +28,33 @@
     });
   }
 
+  // Навешиваем события на звёздочки
+  stars.forEach((star, index) => {
+    star.style.cursor = 'pointer';
+
+    star.addEventListener('click', () => {
+      selectedRating = index + 1;
+      updateStars(selectedRating);
+    });
+
+    star.addEventListener('mouseenter', () => {
+      updateStars(index + 1);
+    });
+
+    star.addEventListener('mouseleave', () => {
+      updateStars(selectedRating);
+    });
+  });
+
+  // Обновление статистики
   function updateStats(stats) {
     statsContainer.textContent = `Всего отзывов: ${stats.count} | Средняя оценка: ${stats.average}`;
   }
 
+  // Отрисовка отзывов
   function renderReviews(reviews) {
     reviewsContainer.innerHTML = '';
-    reviews.slice().reverse().forEach(({ id, name, rating, comment }) => {
+    reviews.slice().reverse().forEach(({ name, rating, comment, id }) => {
       const review = document.createElement('div');
       review.classList.add('review');
 
@@ -68,6 +83,7 @@
   }
 
   const form = document.getElementById('reviewForm');
+
   form.addEventListener('submit', e => {
     e.preventDefault();
 
@@ -93,7 +109,7 @@
 
       form.reset();
       selectedRating = 0;
-      highlightStars(0);
+      updateStars(0);
     } else {
       alert('Нет соединения с сервером');
     }
