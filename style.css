@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+/* Общие настройки и темный стиль */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 * {
   box-sizing: border-box;
@@ -7,109 +8,227 @@
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: #0f1c3f;
-  color: #e1e5ee;
+  background: #0d1117;
+  color: #c9d1d9;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 40px 20px;
-  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
-  max-width: 600px;
+  max-width: 720px;
   width: 100%;
-  background: #1a2948;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-  padding: 30px 40px;
+  background: #161b22;
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 0 30px rgb(3 102 214 / 0.5);
+  animation: fadeIn 1s ease forwards;
 }
 
-h1, h2 {
-  color: #7ea1ff;
+h1 {
+  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #58a6ff;
   text-align: center;
-  margin-bottom: 25px;
   user-select: none;
 }
 
-form label {
-  display: block;
-  margin-bottom: 8px;
+/* Статистика */
+.stats {
+  display: flex;
+  justify-content: space-around;
   font-weight: 600;
-  color: #a0b1ff;
+  margin-bottom: 1.5rem;
+  color: #79c0ff;
+  font-size: 1.1rem;
+}
+
+/* Форма */
+.form-section {
+  margin-bottom: 2rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #79c0ff;
 }
 
 input[type="text"],
 input[type="number"],
 textarea {
-  width: 100%;
-  background: #273660;
-  border: none;
+  background: #0d1117;
+  border: 2px solid #30363d;
   border-radius: 8px;
-  padding: 10px 15px;
-  margin-bottom: 20px;
-  font-size: 16px;
-  color: #cbd3f8;
-  transition: background-color 0.3s ease;
+  padding: 0.6rem 1rem;
+  color: #c9d1d9;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
   font-family: 'Inter', sans-serif;
+  resize: vertical;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus {
-  background: #344e93;
   outline: none;
+  border-color: #2389ff;
+  box-shadow: 0 0 6px #2389ffaa;
 }
 
-button {
-  width: 100%;
-  background: #5671ff;
-  border: none;
-  padding: 14px 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+textarea {
+  min-height: 100px;
+}
+
+.error-message {
+  color: #f85149;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  min-height: 1.1em;
   user-select: none;
 }
 
-button:hover {
-  background: #7a95ff;
-}
-
-hr {
-  border: none;
-  border-top: 1px solid #344e93;
-  margin: 30px 0;
-}
-
-#stats {
+/* Кнопка */
+button[type="submit"] {
+  background: #2389ff;
+  color: white;
   font-weight: 600;
-  color: #a8b8ff;
-  margin-bottom: 15px;
-  text-align: center;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  user-select: none;
+  box-shadow: 0 5px 15px rgb(35 137 255 / 0.6);
+}
+
+button[type="submit"]:hover,
+button[type="submit"]:focus {
+  background: #1b6fd1;
+  box-shadow: 0 8px 20px rgb(27 111 209 / 0.8);
+  outline: none;
+}
+
+/* Сообщения формы */
+.form-message {
+  margin-top: 0.4rem;
+  font-size: 1rem;
+  min-height: 1.2em;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.form-message.error {
+  color: #f85149;
+}
+
+.form-message.success {
+  color: #2ea043;
+}
+
+.form-message.info {
+  color: #58a6ff;
+}
+
+/* Отзывы */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .review {
-  background: #273660;
-  padding: 15px 20px;
-  margin-bottom: 15px;
+  background: #21262d;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
-  box-shadow: inset 0 0 10px rgba(86, 113, 255, 0.5);
-  user-select: text;
+  box-shadow: 0 0 10px rgb(35 137 255 / 0.3);
+  transition: background-color 0.3s ease;
 }
 
-.review-header {
+.review:hover {
+  background: #2c313a;
+}
+
+.review header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-weight: 700;
-  font-size: 1.1em;
-  color: #a0b1ff;
+  margin-bottom: 0.6rem;
 }
 
-.rating {
-  color: #f0c419;
+.review-name {
   font-weight: 700;
+  color: #58a6ff;
+}
+
+.review-rating {
+  font-weight: 600;
+  color: #79c0ff;
+  user-select: none;
+}
+
+.review-comment {
+  white-space: pre-wrap;
+  font-size: 1rem;
+  color: #c9d1d9;
+}
+
+/* Нет отзывов */
+.no-reviews {
+  font-style: italic;
+  color: #8b949e;
+  text-align: center;
+  user-select: none;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  .container {
+    padding: 1.5rem 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats {
+    flex-direction: column;
+    gap: 0.6rem;
+    font-size: 1rem;
+  }
+
+  button[type="submit"] {
+    font-size: 1rem;
+  }
 }
