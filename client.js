@@ -64,7 +64,6 @@
         rating,
         comment
       }));
-
       form.reset();
     } else {
       alert('Нет соединения с сервером');
