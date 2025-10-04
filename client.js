@@ -1,72 +1,55 @@
 (() => {
   const ws = new WebSocket(`ws://${window.location.host}`);
 
-  const reviewsContainer = document.getElementById('reviewsContainer');
-  const statsContainer = document.getElementById('statsContainer');
+  const reviewsEl = document.getElementById('reviews');
+  const statsEl = document.getElementById('stats');
+  const form = document.getElementById('reviewForm');
 
   function renderReviews(reviews) {
-    reviewsContainer.innerHTML = '';
-    reviews.slice().reverse().forEach(({ name, rating, comment }) => {
-      const review = document.createElement('div');
-      review.classList.add('review');
+    reviewsEl.innerHTML = '';
+    if (reviews.length === 0) {
+      reviewsEl.textContent = 'Пока нет отзывов.';
+      return;
+    }
+    reviews.slice().reverse().forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'review';
 
-      const header = document.createElement('div');
-      header.classList.add('review-header');
-
-      const userName = document.createElement('div');
-      userName.textContent = name;
-
-      const ratingElem = document.createElement('div');
-      ratingElem.classList.add('review-rating');
-      ratingElem.textContent = rating.toFixed(1);
-
-      header.appendChild(userName);
-      header.appendChild(ratingElem);
-
-      const commentElem = document.createElement('div');
-      commentElem.classList.add('review-comment');
-      commentElem.textContent = comment;
-
-      review.appendChild(header);
-      review.appendChild(commentElem);
-
-      reviewsContainer.appendChild(review);
+      div.innerHTML = `
+        <div class="review-header">
+          <strong>${escapeHTML(r.name)}</strong>
+          <span class="rating">${r.rating.toFixed(1)}</span>
+        </div>
+        <div class="review-comment">${escapeHTML(r.comment)}</div>
+      `;
+      reviewsEl.appendChild(div);
     });
   }
 
   function updateStats(stats) {
-    statsContainer.textContent = `Всего отзывов: ${stats.count} | Средняя оценка: ${stats.average}`;
+    statsEl.textContent = `Всего отзывов: ${stats.count} | Средняя оценка: ${stats.average}`;
   }
-
-  const form = document.getElementById('reviewForm');
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-
     const name = form.name.value.trim();
     const comment = form.comment.value.trim();
     let rating = parseFloat(form.rating.value);
 
     if (!name || !comment) {
-      alert('Пожалуйста, заполните все поля.');
+      alert('Пожалуйста, заполните все поля');
       return;
     }
-
     if (isNaN(rating) || rating < 0 || rating > 5) {
-      alert('Пожалуйста, введите оценку от 0.0 до 5.0');
+      alert('Оценка должна быть от 0.0 до 5.0');
       return;
     }
 
     if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'new_review',
-        name,
-        rating,
-        comment
-      }));
+      ws.send(JSON.stringify({ type: 'new_review', name, rating, comment }));
       form.reset();
     } else {
-      alert('Нет соединения с сервером');
+      alert('Соединение с сервером потеряно.');
     }
   });
 
@@ -79,8 +62,6 @@
     if (data.type === 'reviews_update') {
       updateStats(data.stats);
       renderReviews(data.reviews);
-    } else if (data.type === 'error') {
-      alert(`Ошибка сервера: ${data.message}`);
     }
   });
 
@@ -88,7 +69,18 @@
     console.log('WebSocket отключён');
   });
 
-  ws.addEventListener('error', err => {
-    console.error('WebSocket ошибка:', err);
+  ws.addEventListener('error', () => {
+    console.error('Ошибка WebSocket');
   });
+
+  // Безопасный вывод текста (просто чтобы не было XSS)
+  function escapeHTML(text) {
+    return text.replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c]);
+  }
 })();
