@@ -3,33 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Отзывы к Никите Нарушавичусу</title>
+  <title>Отзывы | Никита Нарушавичус</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Отзывы к программисту Никите Нарушавичусу</h1>
+  <main class="container">
+    <h1>Отзывы</h1>
+    
+    <section class="stats" aria-live="polite" aria-atomic="true">
+      <div>Всего отзывов: <span id="reviews-count">0</span></div>
+      <div>Средняя оценка: <span id="reviews-average">0.00</span></div>
+    </section>
 
-    <form id="reviewForm">
-      <label for="name">Имя</label>
-      <input id="name" type="text" placeholder="Ваше имя" required />
+    <section class="form-section" aria-label="Форма отправки отзыва">
+      <form id="review-form" novalidate>
+        <div class="field">
+          <label for="name">Имя <sup>*</sup></label>
+          <input type="text" id="name" name="name" required minlength="2" maxlength="50" autocomplete="off" />
+          <span class="error-message" id="error-name"></span>
+        </div>
 
-      <label for="rating">Оценка (0.0 - 5.0)</label>
-      <input id="rating" type="number" step="0.1" min="0" max="5" placeholder="Введите оценку" required />
+        <div class="field">
+          <label for="rating">Оценка (0.0 – 5.0) <sup>*</sup></label>
+          <input type="number" id="rating" name="rating" min="0" max="5" step="0.1" required />
+          <span class="error-message" id="error-rating"></span>
+        </div>
 
-      <label for="comment">Отзыв</label>
-      <textarea id="comment" placeholder="Напишите отзыв" rows="4" required></textarea>
+        <div class="field">
+          <label for="comment">Комментарий <sup>*</sup></label>
+          <textarea id="comment" name="comment" rows="4" required minlength="5" maxlength="500"></textarea>
+          <span class="error-message" id="error-comment"></span>
+        </div>
 
-      <button type="submit">Отправить отзыв</button>
-    </form>
+        <button type="submit">Отправить отзыв</button>
+        <div class="form-message" aria-live="polite" id="form-message"></div>
+      </form>
+    </section>
 
-    <hr />
+    <section class="reviews-list" aria-label="Список отзывов" id="reviews-list">
+      <!-- Отзывы появятся здесь -->
+    </section>
+  </main>
 
-    <h2>Отзывы</h2>
-    <div id="stats"></div>
-    <div id="reviews"></div>
-  </div>
-
-  <script src="client.js"></script>
+  <script src="client.js" defer></script>
 </body>
 </html>
